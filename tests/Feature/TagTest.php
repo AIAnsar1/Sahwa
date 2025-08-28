@@ -11,9 +11,7 @@ class TagTest extends TestCase
 {
 
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
+   
     public function test_get_tag_inext_request(): void
     {
         $response = $this->get("/api/application/tags");
@@ -32,13 +30,12 @@ class TagTest extends TestCase
     public function test_get_tag_show_request(): void
     {
         $tag = Tag::factory()->create();
+        $freshTag = Tag::find($tag->id);
         $response = $this->get("/api/application/tags/{$tag->id}");
         $response->assertStatus(200);
-        $response->assertJsonFragment([
-            'title' => $tag->title
-        ]);
-        $responseData = $response->json();
-        $this->assertEquals($tag->title, $responseData['data']['title']);
+        $response->assertJsonPath('data.id', $freshTag->id);
+        $response->assertJsonPath('data.title', $freshTag->title);
+        $response->assertJsonPath('data.slug', $freshTag->slug);
     }
 
     public function test_put_tag_update_request(): void

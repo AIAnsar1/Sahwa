@@ -31,7 +31,13 @@ Route::post('/check-email-verification', [EmailVerificationController::class, 'c
 
 
 Route::prefix('/application')->group( function (): void {
-    Route::apiResource('/tags', TagController::class);
+    // Route::apiResource('/tags', TagController::class);
+
+    Route::get('/tags', [TagController::class, 'index']);
+    Route::post('/tags', [TagController::class, 'store']);
+    Route::get('/tags/{tag_id}', [TagController::class, 'show']);
+    Route::put('/tags/{tag_id}', [TagController::class, 'update']);
+    Route::delete('/tags/{tag_id}', [TagController::class, 'destroy']);
 })->middleware(['auth:api', RBAC::class]);
 
 Route::apiResource('/application/users', UserController::class);
