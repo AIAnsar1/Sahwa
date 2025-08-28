@@ -1,0 +1,297 @@
+pipeline {
+    agent any
+
+    environment {
+        // Application Environment
+        APP_ENV = "testing"
+        APP_DEBUG = "false"
+        APP_URL = "http://localhost"
+        
+        // Database Configuration
+        DB_CONNECTION = "pgsql"
+        DB_HOST = "postgres"
+        DB_PORT = "5432"
+        DB_DATABASE = "mockexam_test"
+        DB_USERNAME = "postgres"
+        DB_PASSWORD = "postgres"
+        
+        // Cache & Session
+        CACHE_DRIVER = "redis"
+        SESSION_DRIVER = "redis"
+        QUEUE_CONNECTION = "redis"
+        REDIS_HOST = "redis"
+        REDIS_PORT = "6379"
+        
+        // Docker & Registry
+        DOCKER_IMAGE = "mockexam-laravel-octane"
+        DOCKER_TAG = "${BUILD_NUMBER}"
+        REGISTRY_URL = "your-registry.com"
+        
+        // System PATH
+        PATH = "$PATH:/usr/local/bin:/usr/bin"
+    }
+
+    stages {
+        stage("Checkout") {
+            steps {
+                echo "Checking out source code..."
+                checkout scm
+            }
+        }
+
+        stage("Setup Environment") {
+            steps {
+                echo "Setting up environment..."
+                sh '''
+                    # Copy environment file
+                    cp .env.example .env
+                    
+                    # Set environment variables
+                    sed -i "s/APP_ENV=.*/APP_ENV=${APP_ENV}/" .env
+                    sed -i "s/DB_CONNECTION=.*/DB_CONNECTION=${DB_CONNECTION}/" .env
+                    sed -i "s/DB_HOST=.*/DB_HOST=${DB_HOST}/" .env
+                    sed -i "s/DB_PORT=.*/DB_PORT=${DB_PORT}/" .env
+                    sed -i "s/DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE}/" .env
+                    sed -i "s/DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME}/" .env
+                    sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD}/" .env
+                '''
+            }
+        }
+
+        stage("Start Services") {
+            steps {
+                echo "Starting PostgreSQL and Redis services..."
+                sh '''
+                    # Start PostgreSQL container
+                    docker run -d --name postgres-test \
+                        -e POSTGRES_DB=${DB_DATABASE} \
+                        -e POSTGRES_USER=${DB_USERNAME} \
+                        -e POSTGRES_PASSWORD=${DB_PASSWORD} \
+                        -p 5432:5432 \
+                        postgres:15-alpine
+                    
+                    # Start Redis container
+                    docker run -d --name redis-test \
+                        -p 6379:6379 \
+                        redis:7-alpine
+                    
+                    # Wait for services to be ready
+                    sleep 10
+                '''
+            }
+        }
+
+        stage("Install Dependencies") {
+            steps {
+                echo "Installing PHP dependencies..."
+                sh '''
+                    # Install Composer dependencies
+                    composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+                    
+                    # Install Node.js dependencies if needed
+                    if [ -f "package.json" ]; then
+                        npm ci --production
+                        npm run build
+                    fi
+                '''
+            }
+        }
+
+        stage("Generate Application Key") {
+            steps {
+                echo "Generating application key..."
+                sh "php artisan key:generate --force"
+            }
+        }
+
+        stage("Cache Configuration") {
+            steps {
+                echo "Caching Laravel configuration..."
+                sh '''
+                    php artisan config:cache
+                    php artisan route:cache
+                    php artisan view:cache
+                '''
+            }
+        }
+
+        stage("Database Setup") {
+            steps {
+                echo "Setting up database..."
+                sh '''
+                    # Wait for PostgreSQL to be ready
+                    until pg_isready -h localhost -p 5432 -U ${DB_USERNAME}; do
+                        echo "Waiting for PostgreSQL..."
+                        sleep 2
+                    done
+                    
+                    # Run migrations and seeders
+                    php artisan migrate:fresh --seed --force
+                '''
+            }
+        }
+
+        stage("Run Tests") {
+            parallel {
+                stage("PHPUnit Tests") {
+                    steps {
+                        echo "Running PHPUnit tests..."
+                        sh '''
+                            # Create test results directory
+                            mkdir -p tests/results
+                            
+                            # Run PHPUnit with coverage
+                            ./vendor/bin/phpunit \
+                                --testdox \
+                                --coverage-html tests/results/coverage \
+                                --log-junit tests/results/phpunit.xml
+                        '''
+                    }
+                }
+                
+                stage("Code Quality") {
+                    steps {
+                        echo "Running code quality checks..."
+                        sh '''
+                            # PHP CS Fixer (if available)
+                            if [ -f "./vendor/bin/php-cs-fixer" ]; then
+                                ./vendor/bin/php-cs-fixer fix --dry-run --diff
+                            fi
+                            
+                            # PHPStan (if available)
+                            if [ -f "./vendor/bin/phpstan" ]; then
+                                ./vendor/bin/phpstan analyse
+                            fi
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage("Build Docker Image") {
+            steps {
+                echo "Building Docker image with Laravel Octane..."
+                sh '''
+                    # Build Docker image
+                    docker build \
+                        -t ${DOCKER_IMAGE}:${DOCKER_TAG} \
+                        -t ${DOCKER_IMAGE}:latest \
+                        --build-arg APP_ENV=production \
+                        .
+                    
+                    # Test the built image
+                    docker run --rm \
+                        -e APP_ENV=production \
+                        ${DOCKER_IMAGE}:${DOCKER_TAG} \
+                        php artisan --version
+                '''
+            }
+        }
+
+        stage("Security Scan") {
+            steps {
+                echo "Running security scans..."
+                sh '''
+                    # Composer security audit
+                    composer audit
+                    
+                    # Docker image security scan (if trivy is available)
+                    if command -v trivy &> /dev/null; then
+                        trivy image ${DOCKER_IMAGE}:${DOCKER_TAG}
+                    fi
+                '''
+            }
+        }
+
+        stage("Deploy to Staging") {
+            when {
+                branch 'develop'
+            }
+            steps {
+                echo "Deploying to staging environment..."
+                sh '''
+                    # Tag image for staging
+                    docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:staging
+                    
+                    # Deploy to staging (example with docker-compose)
+                    # docker-compose -f docker-compose.staging.yml up -d
+                    
+                    echo "Staging deployment completed"
+                '''
+            }
+        }
+
+        stage("Deploy to Production") {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo "Deploying to production environment..."
+                input message: 'Deploy to production?', ok: 'Deploy'
+                sh '''
+                    # Tag image for production
+                    docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:production
+                    
+                    # Push to registry (if configured)
+                    # docker push ${REGISTRY_URL}/${DOCKER_IMAGE}:${DOCKER_TAG}
+                    # docker push ${REGISTRY_URL}/${DOCKER_IMAGE}:production
+                    
+                    # Deploy to production
+                    # kubectl apply -f k8s/production/
+                    # or docker-compose -f docker-compose.prod.yml up -d
+                    
+                    echo "Production deployment completed"
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Cleaning up..."
+            
+            // Publish test results
+            publishTestResults testResultsPattern: 'tests/results/phpunit.xml'
+            
+            // Publish coverage reports
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'tests/results/coverage',
+                reportFiles: 'index.html',
+                reportName: 'Coverage Report'
+            ])
+            
+            // Clean up Docker containers
+            sh '''
+                docker stop postgres-test redis-test || true
+                docker rm postgres-test redis-test || true
+                docker system prune -f
+            '''
+            
+            // Archive artifacts
+            archiveArtifacts artifacts: 'tests/results/**/*', allowEmptyArchive: true
+            
+            // Clean workspace
+            cleanWs()
+        }
+        
+        success {
+            echo "Pipeline completed successfully!"
+            // Send success notification
+            // slackSend channel: '#deployments', 
+            //           color: 'good', 
+            //           message: "✅ MockExam deployment successful - Build #${BUILD_NUMBER}"
+        }
+        
+        failure {
+            echo "Pipeline failed!"
+            // Send failure notification
+            // slackSend channel: '#deployments', 
+            //           color: 'danger', 
+            //           message: "❌ MockExam deployment failed - Build #${BUILD_NUMBER}"
+        }
+    }
+}
+Footer
