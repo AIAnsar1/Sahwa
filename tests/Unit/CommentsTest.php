@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Comments;
 
 
-#[\PHPUnit\Framework\Attributes\Group('skip')]
 class CommentsTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,8 +37,8 @@ class CommentsTest extends TestCase
     public function test_can_update_model(): void
     {
         $model = $this->createModel();
-        $model->update(['name' => 'Updated Name']);
-        $this->assertEquals('Updated Name', $model->fresh()->name);
+        $model->update(['content' => 'Updated content']);
+        $this->assertEquals('Updated content', $model->fresh()->content);
     }
 
     public function test_can_delete_model(): void

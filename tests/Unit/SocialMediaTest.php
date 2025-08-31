@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\SocialMedia;
 
 
-#[\PHPUnit\Framework\Attributes\Group('skip')]
 class SocialMediaTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,8 +37,8 @@ class SocialMediaTest extends TestCase
     public function test_can_update_model(): void
     {
         $model = $this->createModel();
-        $model->update(['name' => 'Updated Name']);
-        $this->assertEquals('Updated Name', $model->fresh()->name);
+        $model->update(['platform' => 'Updated platform']);
+        $this->assertEquals('Updated platform', $model->fresh()->platform);
     }
 
     public function test_can_delete_model(): void

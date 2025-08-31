@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Authors;
 
 
-#[\PHPUnit\Framework\Attributes\Group('skip')]
 class AuthorsTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,8 +37,8 @@ class AuthorsTest extends TestCase
     public function test_can_update_model(): void
     {
         $model = $this->createModel();
-        $model->update(['name' => 'Updated Name']);
-        $this->assertEquals('Updated Name', $model->fresh()->name);
+        $model->update(['bio' => 'Updated Name']);
+        $this->assertEquals('Updated Name', $model->fresh()->bio);
     }
 
     public function test_can_delete_model(): void

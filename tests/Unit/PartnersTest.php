@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Partners;
 
 
-#[\PHPUnit\Framework\Attributes\Group('skip')]
 class PartnersTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,8 +37,8 @@ class PartnersTest extends TestCase
     public function test_can_update_model(): void
     {
         $model = $this->createModel();
-        $model->update(['name' => 'Updated Name']);
-        $this->assertEquals('Updated Name', $model->fresh()->name);
+        $model->update(['title' => 'Updated title']);
+        $this->assertEquals('Updated title', $model->fresh()->title);
     }
 
     public function test_can_delete_model(): void

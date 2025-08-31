@@ -8,7 +8,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Category;
 
 
-#[\PHPUnit\Framework\Attributes\Group('skip')]
 class CategoryTest extends TestCase
 {
     use RefreshDatabase;
@@ -38,8 +37,8 @@ class CategoryTest extends TestCase
     public function test_can_update_model(): void
     {
         $model = $this->createModel();
-        $model->update(['name' => 'Updated Name']);
-        $this->assertEquals('Updated Name', $model->fresh()->name);
+        $model->update(attributes: ['title' => 'Updated title']);
+        $this->assertEquals('Updated title', $model->fresh()->title);
     }
 
     public function test_can_delete_model(): void
