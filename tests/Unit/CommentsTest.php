@@ -31,7 +31,7 @@ class CommentsTest extends TestCase
     public function test_can_store_model(): void
     {
         $model = $this->createModel();
-        $this->assertDatabaseHas('сomments', ['id' => $model->id]);
+        $this->assertDatabaseHas('comments', ['id' => $model->id]);
     }
 
     public function test_can_update_model(): void
@@ -46,7 +46,7 @@ class CommentsTest extends TestCase
         $model = $this->createModel();
         $model->delete();
         // change crud_generators to your migration name
-        $this->assertDatabaseMissing('сomments', [
+        $this->assertDatabaseMissing('comments', [
             'id' => $model->id,
         ]);
     }
