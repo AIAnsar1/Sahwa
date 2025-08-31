@@ -11,7 +11,7 @@ class TagTest extends TestCase
 {
 
     use RefreshDatabase;
-   
+
     public function test_get_tag_inext_request(): void
     {
         $response = $this->get("/api/application/tags");
@@ -19,7 +19,7 @@ class TagTest extends TestCase
     }
 
     public function test_post_tag_store_request(): void
-    {   
+    {
         $response = $this->post("/api/application/tags", [
             'title' => 'Example Tag',
         ]);

@@ -16,6 +16,7 @@ class Tag extends BaseModel
      */
     protected $fillable = [
         'title',
+        'slug',
     ];
     
     /**
@@ -52,5 +53,11 @@ class Tag extends BaseModel
                 'source' => 'title'
             ]
         ];
+    }
+
+
+    public function articles()
+    {
+        $this->belongsToMany(Articles::class, 'article_tag');
     }
 }

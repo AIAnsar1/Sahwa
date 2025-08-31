@@ -22,17 +22,4 @@ class TagFactory extends Factory
             'title' => $this->faker->unique()->word(),
         ];
     }
-
-    public function configure(): static
-    {
-        return $this->afterCreating(function (Tag $tag) 
-        {
-            if (!app()->runningUnitTests()) 
-            {
-                $tags = ['Laravel', 'PHP', 'Development', 'Testing', 'Database'];
-                $randomTags = $this->faker->randomElements($tags, $this->faker->numberBetween(1, 3));
-                $tag->attachTags($randomTags);
-            }
-        });
-    }
 }
