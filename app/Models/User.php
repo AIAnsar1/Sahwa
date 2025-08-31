@@ -11,10 +11,11 @@ use App\Constants\GeneralStatus;
 use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\PermissionRegistrar;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Qirolab\Laravel\Reactions\Traits\Reacts;
 
 class User extends BaseModel
 {
-    use HasApiTokens, HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasApiTokens, HasFactory, Notifiable, Reacts;
     /**
      * The attributes that are mass assignable.
      *
@@ -96,7 +97,7 @@ class User extends BaseModel
     {
         return $this->hasMany(UserRoles::class);
     }
-    
+
     public function getActiveRole()
     {
         return $this->roles()->where('status', GeneralStatus::STATUS_ACTIVE)->first();
@@ -119,4 +120,13 @@ class User extends BaseModel
          }
          return $query;
      }
+
+    public function authors()
+    {
+        return $this->hasOne(Authors::class, 'users_id');
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comments::class);
+    }
 }
