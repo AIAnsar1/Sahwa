@@ -1,6 +1,6 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-# 🌍 [Project Name] — Sahwa Islamic News Platform
+# 🌍 [Sahwa] — Sahwa Islamic News Platform
 
 [![Laravel](https://img.shields.io/badge/Laravel-10.x-red?logo=laravel)](https://laravel.com/)
 [![PHP](https://img.shields.io/badge/PHP-8.2-blue?logo=php)](https://www.php.net/)
