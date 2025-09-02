@@ -1,21 +1,38 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
+# 🌍 [Project Name] — Sahwa Islamic News Platform
 
-## About Laravel Monolith Structure Starter Main
+[![Laravel](https://img.shields.io/badge/Laravel-10.x-red?logo=laravel)](https://laravel.com/)
+[![PHP](https://img.shields.io/badge/PHP-8.2-blue?logo=php)](https://www.php.net/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-%23336791?logo=postgresql)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-Cache-%23DD0031?logo=redis)](https://redis.io/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-![Created By](https://img.shields.io/badge/Created%20By-Al%20Ayubi-brightgreen)
-![Powered By](https://img.shields.io/badge/Powered%20By-Al%20Ansar-blue)
+---
 
-Laravel  | Laravel Monolith API | PHP Version
-:---------|:----------------------|:------------
- 12.x     | 3.8.2                 | 8.3+
+## 📖 О проекте
 
-## Requirements
+**[Sahwa]** — это исламский новостной портал, созданный с миссией распространять достоверную информацию, свободную от цензуры и давления.  
+Платформа сочетает **современные технологии** и **ценности уммы**, предоставляя пользователям быстрый доступ к актуальным новостям через **сайт, мобильное приложение и социальные сети**.
 
-- **PHP**: 8.3 or higher
-- **Composer**: Latest version  
-- **Node.js**: 18+ (for frontend assets)
-- **Database**: PostgreSQL 13+ (recommended) or MySQL 8.0+
+---
 
-## Usage
+## 🚀 Функционал
+- 📡 Публикация новостей с админ-панели  
+- 🔎 Поиск и фильтрация по темам  
+- 📰 Категории и теги  
+- 💬 Комментарии и обсуждения (модерация)  
+- 📱 Интеграция с YouTube, Telegram, Instagram, X (Twitter)  
+- ⚡️ Высокая производительность (Laravel Octane + RoadRunner)  
+- 🔐 Авторизация (Passport / JWT), роли и права пользователей  
+- 🛠 CI/CD через GitHub Actions и Jenkins  
+
+---
+
+## 🛠️ Технологии
+- **Backend**: Laravel 10, PHP 8.2  
+- **Database**: PostgreSQL + Redis (кэш и очереди)  
+- **Deployment**: Docker, Nginx, Supervisor  
+- **Patterns**: Service/Repository, DTO, Unit of Work  
+- **Testing**: PHPUnit (Unit, Feature), Factory & Seeder  
 
